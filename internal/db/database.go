@@ -12,7 +12,7 @@ import (
 type Database interface {
 	CreateGormDbConnection() (*gorm.DB, error)
 	GetAllEpisodes() ([]model.Episode, error)
-	GetEpisodeByEpisodeNumber(episodeNumber string) ([]model.JeopardyGameBoxScore, error)
+	GetGameByEpisodeNumber(episodeNumber string) ([]model.JeopardyGameBoxScore, error)
 	GetMostRecentEpisodeNumber() (string, error)
 }
 
@@ -54,7 +54,19 @@ func (d *DatabaseConnx) GetAllEpisodes(orderBy string) ([]model.Episode, error) 
 	return episodes, nil
 }
 
-func (d *DatabaseConnx) GetEpisodeByEpisodeNumber(episodeNumber string) ([]model.JeopardyGameBoxScore, error) {
+func (d *DatabaseConnx) GetAllContestants(orderBy string) ([]model.Contestant, error) {
+	var constestants []model.Contestant
+
+	sql := fmt.Sprintf(`SELECT DISTINCT ON (contestant_last_name, contestant_first_name, home_city, home_state) contestant_first_name, contestant_last_name, home_city, home_state, is_winner FROM jeopardy_game_box_scores ORDER BY contestant_last_name %s`,
+		orderBy)
+	if result := d.gorm.Raw(sql).Scan(&constestants); result.Error != nil {
+		return nil, result.Error
+	}
+
+	return constestants, nil
+}
+
+func (d *DatabaseConnx) GetGameByEpisodeNumber(episodeNumber string) ([]model.JeopardyGameBoxScore, error) {
 	var boxScores []model.JeopardyGameBoxScore
 	if err := d.gorm.Where("episode_number = ?", episodeNumber).Find(&boxScores).Error; err != nil {
 		return nil, err

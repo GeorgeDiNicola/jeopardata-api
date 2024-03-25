@@ -21,14 +21,24 @@ func (j *JeopardyApi) GetEpisodes(c *gin.Context) {
 	c.JSON(http.StatusOK, allEpisodes)
 }
 
-func (j *JeopardyApi) GetEpisodeByNumber(c *gin.Context) {
-	episodeNumber := c.Param("episodeNumber")
-
-	allEpisodesFromDb, err := j.Db.GetEpisodeByEpisodeNumber(episodeNumber)
+func (j *JeopardyApi) GetAllContestants(c *gin.Context) {
+	allContestants, err := j.Db.GetAllContestants("ASC")
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err})
 		return
 	}
 
-	c.JSON(http.StatusOK, allEpisodesFromDb)
+	c.JSON(http.StatusOK, allContestants)
+}
+
+func (j *JeopardyApi) GetPerformanceForEpisodeNumber(c *gin.Context) {
+	episodeNumber := c.Param("episodeNumber")
+
+	episodes, err := j.Db.GetGameByEpisodeNumber(episodeNumber)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err})
+		return
+	}
+
+	c.JSON(http.StatusOK, episodes)
 }

@@ -20,7 +20,8 @@ func main() {
 	router := gin.Default()
 
 	router.GET("/episodes", jApi.GetEpisodes)
-	router.GET("/episodes/:episodeNumber", jApi.GetEpisodeByNumber)
+	router.GET("/contestants", jApi.GetAllContestants)
+	router.GET("/episodes/:episodeNumber/performance", jApi.GetPerformanceForEpisodeNumber)
 
 	router.Run("localhost:8080")
 }
