@@ -12,6 +12,7 @@ import (
 type Database interface {
 	CreateGormDbConnection() (*gorm.DB, error)
 	GetAllEpisodes() ([]model.Episode, error)
+	GetEpisodeByEpisodeNumber(episodeNumber string) ([]model.JeopardyGameBoxScore, error)
 	GetMostRecentEpisodeNumber() (string, error)
 }
 
@@ -34,20 +35,30 @@ func CreateNewGormDbConnection() (DatabaseConnx, error) {
 
 func (d *DatabaseConnx) GetMostRecentEpisodeNumber() (string, error) {
 	var mostRecentBoxScore model.JeopardyGameBoxScore
-
-	result := d.gorm.Order("episode_number DESC").First(&mostRecentBoxScore)
-	if result.Error != nil {
-		return "", result.Error
+	if err := d.gorm.Order("episode_number DESC").First(&mostRecentBoxScore); err != nil {
+		return "", fmt.Errorf("failed to retrieve most recent episode number: %v", err)
 	}
 
 	return mostRecentBoxScore.EpisodeNumber, nil
 }
 
-func (d *DatabaseConnx) GetAllEpisodes() ([]model.Episode, error) {
+func (d *DatabaseConnx) GetAllEpisodes(orderBy string) ([]model.Episode, error) {
 	var episodes []model.Episode
-	if result := d.gorm.Model(&model.JeopardyGameBoxScore{}).Select("EpisodeNumber", "EpisodeDate").Find(&episodes).Order("episode_date, episode_number DESC"); result.Error != nil {
+
+	sql := fmt.Sprintf(`SELECT DISTINCT ON (episode_number) episode_number, episode_date FROM jeopardy_game_box_scores ORDER BY episode_number, episode_date %s`,
+		orderBy)
+	if result := d.gorm.Raw(sql).Scan(&episodes); result.Error != nil {
 		return nil, result.Error
 	}
 
 	return episodes, nil
+}
+
+func (d *DatabaseConnx) GetEpisodeByEpisodeNumber(episodeNumber string) ([]model.JeopardyGameBoxScore, error) {
+	var boxScores []model.JeopardyGameBoxScore
+	if err := d.gorm.Where("episode_number = ?", episodeNumber).Find(&boxScores).Error; err != nil {
+		return nil, err
+	}
+
+	return boxScores, nil
 }

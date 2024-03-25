@@ -1,5 +1,5 @@
 run:
-	go run .
+	go run cmd/jeopardy-api/main.go
 
 test:
 	go test -cover -v ./...

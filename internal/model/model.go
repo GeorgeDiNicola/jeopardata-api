@@ -6,8 +6,12 @@ import (
 	"gorm.io/gorm"
 )
 
+type JeopardyGameBoxScoreGorm struct {
+	DbFields gorm.Model
+	BoxScore JeopardyGameBoxScore
+}
+
 type JeopardyGameBoxScore struct {
-	gorm.Model
 	EpisodeNumber                  string    `gorm:"type:varchar(100)" json:"episode_number"`
 	EpisodeTitle                   string    `gorm:"type:varchar(100)" json:"episode_title"`
 	EpisodeDate                    time.Time `gorm:"type:date" json:"episode_date"`
