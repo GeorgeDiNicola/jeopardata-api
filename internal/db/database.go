@@ -74,3 +74,12 @@ func (d *DatabaseConnx) GetGameByEpisodeNumber(episodeNumber string) ([]model.Je
 
 	return boxScores, nil
 }
+
+func (d *DatabaseConnx) GetAllGames() ([]model.JeopardyGameBoxScore, error) {
+	var allBoxScores []model.JeopardyGameBoxScore
+	if result := d.gorm.Find(&allBoxScores); result.Error != nil {
+		return nil, result.Error
+	}
+
+	return allBoxScores, nil
+}

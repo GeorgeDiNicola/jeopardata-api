@@ -31,6 +31,16 @@ func (j *JeopardyApi) GetAllContestants(c *gin.Context) {
 	c.JSON(http.StatusOK, allContestants)
 }
 
+func (j *JeopardyApi) GetAllGames(c *gin.Context) {
+	boxScoresAllGames, err := j.Db.GetAllGames()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err})
+		return
+	}
+
+	c.JSON(http.StatusOK, boxScoresAllGames)
+}
+
 func (j *JeopardyApi) GetPerformanceForEpisodeNumber(c *gin.Context) {
 	episodeNumber := c.Param("episodeNumber")
 
