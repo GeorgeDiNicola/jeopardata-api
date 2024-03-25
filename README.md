@@ -1,4 +1,4 @@
-# jeopardata-api
+# jeopardy-api
 An API for getting Jeopardy Game box scores objects, extracted and transformed from [Jeopary's Jeopardata webpage](https://www.jeopardy.com/track/jeopardata).
 For more information about how that data is extracted and transformed, see [the jeopardy-data-scraper project](https://github.com/GeorgeDiNicola/jeopardy-data-scraper/blob/main/README.md)
 
