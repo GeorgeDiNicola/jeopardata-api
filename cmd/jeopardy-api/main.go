@@ -23,6 +23,7 @@ func main() {
 	router.GET("/episodes", jApi.GetEpisodes)
 	router.GET("/episodes/:episodeNumber/performance", jApi.GetPerformanceForEpisodeNumber)
 	router.GET("/games", jApi.GetAllGames)
+	router.GET("/export", jApi.ExportAllGames)
 
 	router.Run("localhost:8080")
 }
