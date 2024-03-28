@@ -3,6 +3,7 @@ package db
 import (
 	"fmt"
 	"os"
+	"strconv"
 
 	"github.com/georgedinicola/jeopardy-api/internal/model"
 
@@ -55,16 +56,30 @@ func (d *DatabaseConnx) GetAllEpisodes(orderBy string) ([]model.Episode, error) 
 	return episodes, nil
 }
 
-func (d *DatabaseConnx) GetAllContestants(orderBy string) ([]model.Contestant, error) {
+func (d *DatabaseConnx) GetContestants(orderBy string, limit int, offset int) ([]model.Contestant, error) {
 	var constestants []model.Contestant
 
-	sql := fmt.Sprintf(`SELECT DISTINCT ON (contestant_last_name, contestant_first_name, home_city, home_state) contestant_first_name, contestant_last_name, home_city, home_state, is_winner FROM jeopardy_game_box_scores ORDER BY contestant_last_name %s`,
-		orderBy)
+	limitStr := strconv.Itoa(limit)
+	offsetStr := strconv.Itoa(offset)
+	sql := fmt.Sprintf(`SELECT DISTINCT ON (contestant_last_name, contestant_first_name, home_city, home_state) contestant_first_name, contestant_last_name, home_city, home_state, is_winner FROM jeopardy_game_box_scores ORDER BY contestant_last_name %s LIMIT %s OFFSET %s`, orderBy, limitStr, offsetStr)
+
 	if result := d.gorm.Raw(sql).Scan(&constestants); result.Error != nil {
 		return nil, result.Error
 	}
 
 	return constestants, nil
+}
+
+func (d *DatabaseConnx) GetTotalCountOfContestants() (int, error) {
+	var constestants []model.Contestant
+
+	sql := `SELECT DISTINCT ON (contestant_last_name, contestant_first_name, home_city, home_state) contestant_first_name, contestant_last_name, home_city, home_state, is_winner FROM jeopardy_game_box_scores ORDER BY contestant_last_name`
+
+	if result := d.gorm.Raw(sql).Scan(&constestants); result.Error != nil {
+		return 0, result.Error
+	}
+
+	return len(constestants), nil
 }
 
 func (d *DatabaseConnx) GetGameByEpisodeNumber(episodeNumber string) ([]model.JeopardyGameBoxScore, error) {

@@ -6,6 +6,7 @@ import (
 	"strconv"
 
 	"github.com/georgedinicola/jeopardy-api/internal/db"
+	"github.com/georgedinicola/jeopardy-api/internal/util"
 
 	"github.com/gin-gonic/gin"
 )
@@ -27,13 +28,34 @@ func CreateNewJeopardyApi(db db.DatabaseConnx) *JeopardyApi {
 }
 
 func (j *JeopardyApi) GetAllContestants(c *gin.Context) {
-	allContestants, err := j.Db.GetAllContestants("ASC")
+	// TODO: set a default limit of 20 and a max limit of 1000
+	limit, page := 1000, 1 // ~1 MB size with headers default size
+	offset := (page - 1) * limit
+
+	if qLimit, ok := c.GetQuery("limit"); ok {
+		userLimit, err := strconv.Atoi(qLimit)
+		if err == nil && userLimit > 0 && userLimit < limit {
+			limit = userLimit
+		}
+		// If the userLimit is greater than the default, keep the default limit
+	}
+	if qPage, ok := c.GetQuery("page"); ok {
+		page, _ = strconv.Atoi(qPage)
+	}
+
+	allContestants, err := j.Db.GetContestants("ASC", limit, offset)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err})
 		return
 	}
 
-	c.JSON(http.StatusOK, allContestants)
+	totalNumContestants, err := j.Db.GetTotalCountOfContestants()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err})
+		return
+	}
+
+	util.CreatePaginationResponse(c, allContestants, totalNumContestants, page, limit)
 }
 
 func (j *JeopardyApi) GetAllGames(c *gin.Context) {
