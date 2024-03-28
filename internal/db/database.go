@@ -2,8 +2,9 @@ package db
 
 import (
 	"fmt"
-	"georgedinicola/jeopardy-api/internal/model"
 	"os"
+
+	"github.com/georgedinicola/jeopardy-api/internal/model"
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -20,7 +21,7 @@ type DatabaseConnx struct {
 	gorm *gorm.DB
 }
 
-func CreateNewGormDbConnection() (DatabaseConnx, error) {
+func CreateNewDatabaseConnx() (DatabaseConnx, error) {
 	dbHost, dbUsername, dbPassword := os.Getenv("DB_HOST"), os.Getenv("DB_USERNAME"), os.Getenv("DB_PASSWORD")
 	dbName, dbPort, dbTimezone := os.Getenv("DB_NAME"), os.Getenv("DB_PORT"), os.Getenv("DB_TIMEZONE")
 

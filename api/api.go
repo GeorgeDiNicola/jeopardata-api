@@ -2,26 +2,28 @@ package api
 
 import (
 	"encoding/csv"
-	"georgedinicola/jeopardy-api/internal/db"
-	"log"
 	"net/http"
 	"strconv"
 
+	"github.com/georgedinicola/jeopardy-api/internal/db"
+
 	"github.com/gin-gonic/gin"
 )
+
+type JeopardyApiInterface interface {
+	GetAllContestants(c *gin.Context)
+	GetAllGames(c *gin.Context)
+	GetEpisodes(c *gin.Context)
+	GetPerformanceForEpisodeNumber(c *gin.Context)
+	ExportAllGames(c *gin.Context)
+}
 
 type JeopardyApi struct {
 	Db db.DatabaseConnx
 }
 
-func (j *JeopardyApi) GetEpisodes(c *gin.Context) {
-	allEpisodes, err := j.Db.GetAllEpisodes("DESC")
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err})
-		return
-	}
-
-	c.JSON(http.StatusOK, allEpisodes)
+func CreateNewJeopardyApi(db db.DatabaseConnx) *JeopardyApi {
+	return &JeopardyApi{Db: db}
 }
 
 func (j *JeopardyApi) GetAllContestants(c *gin.Context) {
@@ -42,6 +44,16 @@ func (j *JeopardyApi) GetAllGames(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, boxScoresAllGames)
+}
+
+func (j *JeopardyApi) GetAllEpisodes(c *gin.Context) {
+	allEpisodes, err := j.Db.GetAllEpisodes("DESC")
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err})
+		return
+	}
+
+	c.JSON(http.StatusOK, allEpisodes)
 }
 
 func (j *JeopardyApi) GetPerformanceForEpisodeNumber(c *gin.Context) {
@@ -91,9 +103,6 @@ func (j *JeopardyApi) ExportAllGames(c *gin.Context) {
 	writer.Write(columnHeaders)
 
 	for _, score := range boxScoresAllGames {
-		if score.EpisodeNumber == "5451" {
-			log.Println(score)
-		}
 		writer.Write([]string{
 			score.EpisodeNumber,
 			score.EpisodeTitle,
